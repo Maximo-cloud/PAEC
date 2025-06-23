@@ -1,0 +1,5 @@
+# Directorios de módulos de Node
+node_modules/
+
+# Archivos de entorno (credenciales sensibles)
+.env

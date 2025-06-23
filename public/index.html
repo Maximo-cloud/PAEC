@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Residuos</title>
+    <style>
+        /* Variables de color */
+        :root {
+            --color-primary: #0A2240; /* Azul Marino Oscuro */
+            --color-secondary: #1F4287; /* Azul Marino Medio */
+            --color-accent: #2196F3; /* Azul Brillante para botones/focos */
+            --color-text: #E0E0E0; /* Gris claro para texto */
+            --color-background: #F0F2F5; /* Fondo claro general */
+            --color-card-background: #FFFFFF; /* Fondo de tarjetas/secciones */
+            --color-border: #BBDEFB; /* Borde claro azul */
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--color-background);
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px; /* Aumentado para mejor visualización de la tabla */
+            margin: 30px auto;
+            background-color: var(--color-card-background);
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            padding-bottom: 20px; /* Espacio extra en la parte inferior del contenedor principal */
+        }
+
+        header {
+            background-color: var(--color-primary);
+            color: var(--color-text);
+            padding: 25px 30px;
+            text-align: center;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.2em;
+            letter-spacing: 1px;
+        }
+
+        /* Estilo para el botón principal de acción */
+        .main-action-button {
+            background-color: var(--color-accent);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            margin: 20px auto; /* Centrar el botón */
+            display: block; /* Para que margin: auto funcione */
+            width: fit-content;
+        }
+
+        .main-action-button:hover {
+            background-color: #1976D2;
+            transform: translateY(-2px);
+        }
+
+        /* Contenedores de las vistas principales */
+        #management-view, #list-view {
+            padding: 0 30px; /* Mantener el padding de los lados */
+            display: none; /* Por defecto, ambas ocultas, se mostrará una con JS */
+        }
+        
+        #management-view.active-view, #list-view.active-view {
+            display: block;
+        }
+
+        .tab-buttons {
+            display: flex;
+            justify-content: center;
+            background-color: var(--color-secondary);
+            padding: 0;
+            border-bottom: 2px solid var(--color-primary);
+            margin: 0 -30px; /* Contrarrestar el padding del padre para que se extienda a los bordes */
+            margin-top: 20px; /* Separación del botón superior */
+        }
+
+        .tab-button {
+            background-color: var(--color-secondary);
+            color: var(--color-text);
+            border: none;
+            padding: 15px 25px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            flex-grow: 1;
+            text-align: center;
+            border-radius: 0;
+        }
+
+        .tab-button:hover {
+            background-color: #315C9C;
+        }
+
+        .tab-button.active {
+            background-color: var(--color-card-background);
+            color: var(--color-primary);
+            border-bottom: 4px solid var(--color-accent);
+            font-weight: bold;
+        }
+
+        .tab-content {
+            padding: 30px 0; /* Padding vertical para el contenido de las pestañas internas */
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        h2 {
+            color: var(--color-primary);
+            margin-top: 30px; /* Más espacio para los títulos de sección */
+            border-bottom: 2px solid var(--color-border);
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+            font-size: 1.8em;
+        }
+
+        form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        form input[type="text"],
+        form input[type="email"],
+        form input[type="number"],
+        form input[type="date"], /* Agregado para fecha_registro */
+        form select /* Agregado para posibles selectores */
+        {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            font-size: 1em;
+            box-sizing: border-box;
+        }
+
+        form input[type="text"]:focus,
+        form input[type="email"]:focus,
+        form input[type="number"]:focus,
+        form input[type="date"]:focus,
+        form select:focus {
+            outline: none;
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
+        }
+
+        form button[type="submit"] {
+            background-color: var(--color-accent);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            grid-column: 1 / -1;
+            margin-top: 15px;
+            justify-self: end;
+            width: fit-content;
+        }
+
+        form button[type="submit"]:hover {
+            background-color: #1976D2;
+            transform: translateY(-2px);
+        }
+
+        /* Estilos para la tabla */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: var(--color-card-background);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        table th,
+        table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        table th {
+            background-color: var(--color-secondary);
+            color: var(--color-text);
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.9em;
+        }
+
+        table tbody tr:nth-child(even) {
+            background-color: #F8F9FA;
+        }
+
+        table tbody tr:hover {
+            background-color: #E3F2FD;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                width: 95%;
+                margin: 20px auto;
+            }
+
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .tab-button {
+                font-size: 1em;
+                padding: 12px 15px;
+            }
+
+            form {
+                grid-template-columns: 1fr;
+            }
+
+            form button[type="submit"], .main-action-button {
+                width: 100%;
+                justify-self: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Gestión de Residuos</h1>
+        </header>
+
+        <button class="main-action-button" onclick="showListView()">📊 Ver Listado de Residuos</button>
+
+        <div id="management-view" class="active-view">
+            <div class="tab-buttons">
+                <button class="tab-button active" onclick="showFormSection('agregar')">➕ Agregar Residuo</button>
+                <button class="tab-button" onclick="showFormSection('actualizar')">📝 Actualizar Residuo</button>
+                <button class="tab-button" onclick="showFormSection('eliminar')">❌ Eliminar Residuo</button>
+            </div>
+
+            <div id="seccion-agregar" class="tab-content active">
+                <h2>Agregar Residuo</h2>
+                <form id="formAgregar">
+                    <input type="text" id="tipoAgregar" name="tipo" placeholder="Tipo de Residuo (ej. Cartón)" required />
+                    <input type="text" id="situacionAgregar" name="situacion" placeholder="Situación (ej. Inorgánico)" required />
+                    <input type="text" id="unidadMedidaAgregar" name="unidad_medida" placeholder="Unidad de Medida (ej. kg, piezas)" required />
+                    <input type="number" id="cantidadAgregar" name="cantidad" placeholder="Cantidad" required />
+                    <input type="text" id="ubicacionAgregar" name="ubicacion" placeholder="Ubicación (ej. Salones, Cafetería)" required />
+                    <input type="date" id="fechaRegistroAgregar" name="fecha_registro" placeholder="Fecha de Registro" required />
+                    <button type="submit">Guardar Residuo</button>
+                </form>
+            </div>
+
+            <div id="seccion-actualizar" class="tab-content">
+                <h2>Actualizar Residuo</h2>
+                <form id="formActualizar">
+                    <p style="grid-column: 1 / -1; margin-bottom: 10px;">Introduce el <strong>ID del Residuo</strong> para actualizar (obtenlo del listado):</p>
+                    <input type="text" id="idActualizar" name="id_residuo" placeholder="ID del Residuo a actualizar" required />
+                    
+                    <p style="grid-column: 1 / -1; margin-top: 20px; margin-bottom: 10px;">Introduce los nuevos valores para los campos que deseas actualizar (deja en blanco los que no):</p>
+                    <input type="text" id="tipoActualizar" name="tipo" placeholder="Nuevo Tipo" />
+                    <input type="text" id="situacionActualizar" name="situacion" placeholder="Nueva Situación" />
+                    <input type="text" id="unidadMedidaActualizar" name="unidad_medida" placeholder="Nueva Unidad de Medida" />
+                    <input type="number" id="cantidadActualizar" name="cantidad" placeholder="Nueva Cantidad" />
+                    <input type="text" id="ubicacionActualizar" name="ubicacion" placeholder="Nueva Ubicación" />
+                    <input type="date" id="fechaRegistroActualizar" name="fecha_registro" placeholder="Nueva Fecha de Registro" />
+                    <button type="submit">Actualizar Residuo</button>
+                </form>
+            </div>
+
+            <div id="seccion-eliminar" class="tab-content">
+                <h2>Eliminar Residuo</h2>
+                <form id="formEliminar">
+                    <p style="grid-column: 1 / -1; margin-bottom: 10px;">Introduce el <strong>ID del Residuo</strong> a eliminar (obtenlo del listado):</p>
+                    <input type="text" id="idEliminar" name="id_residuo" placeholder="ID del Residuo a eliminar" required />
+                    <button type="submit">Eliminar Residuo</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="list-view">
+            <h2>Lista de Residuos Registrados</h2>
+            <table id="tablaResiduos">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tipo</th>
+                        <th>Situación</th>
+                        <th>Unidad de Medida</th>
+                        <th>Cantidad</th>
+                        <th>Ubicación</th>
+                        <th>Fecha Registro</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    </tbody>
+            </table>
+            <button class="main-action-button" onclick="showManagementView()">⬅️ Volver a Gestión</button>
+        </div>
+    </div>
+
+    <script>
+        // Función para cambiar entre las secciones de formularios (pestañas internas)
+        function showFormSection(id) {
+            document.querySelectorAll('#management-view .tab-content').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('#management-view .tab-button').forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById(`seccion-${id}`).classList.add('active');
+            document.querySelector(`#management-view .tab-button[onclick="showFormSection('${id}')"]`).classList.add('active');
+        }
+
+        // Función para mostrar la vista de Gestión de Residuos (formularios)
+        function showManagementView() {
+            document.getElementById('management-view').classList.add('active-view');
+            document.getElementById('list-view').classList.remove('active-view');
+            // Asegurarse de que la sección "Agregar Residuo" esté activa al volver
+            showFormSection('agregar');
+        }
+
+        // Función para mostrar la vista de Listado de Residuos (tabla)
+        async function showListView() {
+            document.getElementById('management-view').classList.remove('active-view');
+            document.getElementById('list-view').classList.add('active-view');
+            await cargarResiduos(); // Cargar los residuos cuando se activa la vista de lista
+        }
+
+        // Función para cargar los datos de los residuos en la tabla
+        async function cargarResiduos() {
+            try {
+                // La API ahora será /api/residuos
+                const res = await fetch('/api/residuos');
+                if (!res.ok) {
+                    throw new Error(`Error HTTP: ${res.status}`);
+                }
+                const residuos = await res.json();
+                const tbody = document.querySelector('#tablaResiduos tbody'); // ID de la tabla actualizado
+                tbody.innerHTML = ''; // Limpiar la tabla antes de cargar nuevos datos
+
+                if (residuos.length === 0) {
+                    const filaVacia = document.createElement('tr');
+                    filaVacia.innerHTML = `<td colspan="7" style="text-align: center; padding: 20px; color: #666;">No hay residuos registrados aún.</td>`;
+                    tbody.appendChild(filaVacia);
+                    return;
+                }
+
+                residuos.forEach(residuo => {
+                    const fila = document.createElement('tr');
+                    // Mostrar todos los campos del residuo, incluyendo el _id
+                    fila.innerHTML = `
+                        <td>${residuo._id || 'N/A'}</td>
+                        <td>${residuo.tipo || 'N/A'}</td>
+                        <td>${residuo.situacion || 'N/A'}</td>
+                        <td>${residuo.unidad_medida || 'N/A'}</td>
+                        <td>${residuo.cantidad !== undefined && residuo.cantidad !== null ? residuo.cantidad : 'N/A'}</td>
+                        <td>${residuo.ubicacion || 'N/A'}</td>
+                        <td>${residuo.fecha_registro ? new Date(residuo.fecha_registro).toLocaleDateString() : 'N/A'}</td>
+                    `;
+                    tbody.appendChild(fila);
+                });
+            } catch (error) {
+                console.error("Error al cargar residuos:", error);
+                alert("Error al cargar los residuos. Por favor, intente de nuevo más tarde.");
+            }
+        }
+
+        // --- Funcionalidad de formularios ---
+
+        // Agregar residuo
+        document.getElementById('formAgregar').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const datos = {
+                tipo: document.getElementById('tipoAgregar').value,
+                situacion: document.getElementById('situacionAgregar').value,
+                unidad_medida: document.getElementById('unidadMedidaAgregar').value,
+                cantidad: document.getElementById('cantidadAgregar').value ? parseInt(document.getElementById('cantidadAgregar').value) : undefined,
+                ubicacion: document.getElementById('ubicacionAgregar').value,
+                fecha_registro: document.getElementById('fechaRegistroAgregar').value ? new Date(document.getElementById('fechaRegistroAgregar').value) : undefined
+            };
+
+            try {
+                const res = await fetch('/api/residuos', { // Ruta actualizada
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(datos)
+                });
+                const result = await res.json();
+                if (res.ok) {
+                    alert(result.message || "Residuo agregado con éxito.");
+                    document.getElementById('formAgregar').reset();
+                    if (document.getElementById('list-view').classList.contains('active-view')) {
+                        cargarResiduos();
+                    }
+                } else {
+                    alert(`Error al agregar residuo: ${result.message || 'Error desconocido'}`);
+                }
+            } catch (error) {
+                console.error("Error en la solicitud de agregar:", error);
+                alert("Hubo un problema al agregar el residuo. Verifique su conexión.");
+            }
+        });
+
+        // Actualizar residuo
+        document.getElementById('formActualizar').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id_residuo = document.getElementById('idActualizar').value; // Obtener el ID del residuo
+
+            const datosAActualizar = { // Construir un objeto con solo los campos no vacíos
+                tipo: document.getElementById('tipoActualizar').value || undefined,
+                situacion: document.getElementById('situacionActualizar').value || undefined,
+                unidad_medida: document.getElementById('unidadMedidaActualizar').value || undefined,
+                cantidad: document.getElementById('cantidadActualizar').value ? parseInt(document.getElementById('cantidadActualizar').value) : undefined,
+                ubicacion: document.getElementById('ubicacionActualizar').value || undefined,
+                fecha_registro: document.getElementById('fechaRegistroActualizar').value ? new Date(document.getElementById('fechaRegistroActualizar').value) : undefined
+            };
+            
+            // Eliminar propiedades que son 'undefined' o cadenas vacías
+            Object.keys(datosAActualizar).forEach(key => {
+                if (datosAActualizar[key] === undefined || datosAActualizar[key] === '') {
+                    delete datosAActualizar[key];
+                }
+            });
+
+            if (!id_residuo) {
+                alert("Por favor, introduce el ID del residuo a actualizar.");
+                return;
+            }
+
+            if (Object.keys(datosAActualizar).length === 0) {
+                alert("Por favor, introduce al menos un campo para actualizar.");
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/residuos/${encodeURIComponent(id_residuo)}`, { // Ruta actualizada con ID
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(datosAActualizar)
+                });
+                const result = await res.json();
+                if (res.ok) {
+                    alert(result.message || "Residuo actualizado con éxito.");
+                    document.getElementById('formActualizar').reset();
+                    if (document.getElementById('list-view').classList.contains('active-view')) {
+                        cargarResiduos();
+                    }
+                } else {
+                    alert(`Error al actualizar residuo: ${result.message || 'Error desconocido'}`);
+                }
+            } catch (error) {
+                console.error("Error en la solicitud de actualizar:", error);
+                alert("Hubo un problema al actualizar el residuo. Verifique su conexión.");
+            }
+        });
+
+        // Eliminar residuo
+        document.getElementById('formEliminar').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id_residuo = document.getElementById('idEliminar').value; // Obtener el ID del residuo
+
+            if (!id_residuo) {
+                alert("Por favor, introduce el ID del residuo a eliminar.");
+                return;
+            }
+
+            if (!confirm(`¿Estás seguro de que quieres eliminar el residuo con ID: ${id_residuo}? Esta acción es irreversible.`)) {
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/residuos/${encodeURIComponent(id_residuo)}`, { // Ruta actualizada con ID
+                    method: 'DELETE'
+                });
+                const result = await res.json();
+                if (res.ok) {
+                    alert(result.message || "Residuo eliminado con éxito.");
+                    document.getElementById('formEliminar').reset();
+                    if (document.getElementById('list-view').classList.contains('active-view')) {
+                        cargarResiduos();
+                    }
+                } else {
+                    alert(`Error al eliminar residuo: ${result.message || 'Error desconocido'}`);
+                }
+            } catch (error) {
+                console.error("Error en la solicitud de eliminar:", error);
+                alert("Hubo un problema al eliminar el residuo. Verifique su conexión.");
+            }
+        });
+
+        // Al cargar la página, mostrar la vista de gestión por defecto
+        document.addEventListener('DOMContentLoaded', () => {
+            showManagementView();
+        });
+    </script>
+</body>
+</html>
