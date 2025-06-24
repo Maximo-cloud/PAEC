@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Residuos</title>
+    <title>Gestión de Residuos (Proyecto Jesús)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        /* Variables de color */
+        /* Variables de color - Diseño Moderno y Limpio */
         :root {
             --color-primary: #0A2240; /* Azul Marino Oscuro */
             --color-secondary: #1F4287; /* Azul Marino Medio */
@@ -18,11 +19,11 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Lato', sans-serif; /* Fuente principal */
             margin: 0;
             padding: 0;
             background-color: var(--color-background);
-            color: #333;
+            color: var(--color-text-dark);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -30,98 +31,119 @@
         }
 
         .container {
-            width: 90%;
-            max-width: 1200px; /* Aumentado para mejor visualización de la tabla */
+            width: 95%; /* Más ancho para aprovechar la pantalla */
+            max-width: 1300px; /* Ancho máximo aumentado */
             margin: 30px auto;
             background-color: var(--color-card-background);
-            border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            border-radius: 10px; /* Bordes sutiles */
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08); /* Sombra suave */
             overflow: hidden;
-            padding-bottom: 20px; /* Espacio extra en la parte inferior del contenedor principal */
+            display: flex;
+            flex-direction: column; /* Apilar header y contenido */
+            min-height: 750px; /* Altura mínima para contenido */
         }
 
         header {
             background-color: var(--color-primary);
-            color: var(--color-text);
+            color: var(--color-text-light);
             padding: 25px 30px;
             text-align: center;
-            border-top-left-radius: 12px;
-            border-top-right-radius: 12px;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         header h1 {
             margin: 0;
-            font-size: 2.2em;
-            letter-spacing: 1px;
+            font-size: 2.4em;
+            letter-spacing: 0.5px;
         }
 
-        /* Estilo para el botón principal de acción */
+        /* Contenedor principal para la vista de gestión/listado */
+        #main-view-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column; /* Apilar tabs y contenido */
+            padding: 20px 30px;
+            box-sizing: border-box;
+        }
+
+        /* Estilo para el botón principal de acción (Ver Listado / Volver a Gestión) */
         .main-action-button {
             background-color: var(--color-accent);
             color: white;
             border: none;
             padding: 12px 25px;
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
             font-size: 1.1em;
+            font-weight: bold;
             transition: background-color 0.3s ease, transform 0.2s ease;
-            margin: 20px auto; /* Centrar el botón */
-            display: block; /* Para que margin: auto funcione */
+            margin: 15px 0 25px 0; /* Margen superior e inferior */
+            display: block;
             width: fit-content;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         .main-action-button:hover {
-            background-color: #1976D2;
+            background-color: #FF8C00; /* Tono de naranja ligeramente más oscuro */
             transform: translateY(-2px);
         }
 
         /* Contenedores de las vistas principales */
         #management-view, #list-view {
-            padding: 0 30px; /* Mantener el padding de los lados */
-            display: none; /* Por defecto, ambas ocultas, se mostrará una con JS */
+            display: none;
+            flex-grow: 1; /* Ocupa el espacio restante */
         }
         
         #management-view.active-view, #list-view.active-view {
-            display: block;
+            display: flex; /* Usar flex para organizar su contenido interno */
+            flex-direction: column;
         }
 
+        /* Pestañas de Agregar/Actualizar/Eliminar */
         .tab-buttons {
             display: flex;
-            justify-content: center;
-            background-color: var(--color-secondary);
-            padding: 0;
-            border-bottom: 2px solid var(--color-primary);
-            margin: 0 -30px; /* Contrarrestar el padding del padre para que se extienda a los bordes */
-            margin-top: 20px; /* Separación del botón superior */
+            justify-content: flex-end; /* Alineados a la derecha */
+            margin-bottom: 25px; /* Espacio debajo de las pestañas */
+            border-bottom: 2px solid var(--color-border-light);
         }
 
         .tab-button {
-            background-color: var(--color-secondary);
-            color: var(--color-text);
+            background-color: transparent; /* Fondo transparente por defecto */
+            color: var(--color-text-dark);
             border: none;
-            padding: 15px 25px;
+            border-bottom: 3px solid transparent; /* Borde inferior transparente */
+            padding: 12px 20px;
             cursor: pointer;
-            font-size: 1.1em;
-            transition: background-color 0.3s ease, color 0.3s ease;
-            flex-grow: 1;
-            text-align: center;
-            border-radius: 0;
+            font-size: 1em;
+            font-weight: 600; /* Más peso para el texto */
+            transition: all 0.3s ease;
+            margin-left: 10px; /* Espacio entre botones */
+            white-space: nowrap; /* Evitar salto de línea */
         }
 
         .tab-button:hover {
-            background-color: #315C9C;
+            color: var(--color-primary);
+            border-bottom-color: var(--color-primary);
         }
 
         .tab-button.active {
-            background-color: var(--color-card-background);
             color: var(--color-primary);
-            border-bottom: 4px solid var(--color-accent);
-            font-weight: bold;
+            border-bottom-color: var(--color-primary);
+            background-color: var(--color-background); /* Fondo sutil para la pestaña activa */
+            border-radius: 5px 5px 0 0;
         }
 
         .tab-content {
-            padding: 30px 0; /* Padding vertical para el contenido de las pestañas internas */
+            padding: 25px; /* Padding interior para el contenido de la pestaña */
+            border: 1px solid var(--color-border-light);
+            border-radius: 8px;
+            background-color: var(--color-card-background);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             display: none;
+            flex-grow: 1; /* Para que el contenido de la pestaña ocupe el espacio */
         }
 
         .tab-content.active {
@@ -130,61 +152,76 @@
 
         h2 {
             color: var(--color-primary);
-            margin-top: 30px; /* Más espacio para los títulos de sección */
-            border-bottom: 2px solid var(--color-border);
-            padding-bottom: 10px;
+            margin-top: 0;
             margin-bottom: 25px;
             font-size: 1.8em;
+            text-align: left;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--color-border-light);
         }
 
         form {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Más flexible */
             gap: 20px;
+            align-items: start; /* Alinea los elementos al inicio de la celda */
+        }
+
+        form label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--color-text-dark);
         }
 
         form input[type="text"],
-        form input[type="email"],
         form input[type="number"],
-        form input[type="date"], /* Agregado para fecha_registro */
-        form select /* Agregado para posibles selectores */
-        {
+        form select {
             width: 100%;
-            padding: 12px;
-            border: 1px solid var(--color-border);
-            border-radius: 8px;
+            padding: 10px 12px;
+            border: 1px solid var(--color-border-light);
+            border-radius: 5px;
             font-size: 1em;
             box-sizing: border-box;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
 
         form input[type="text"]:focus,
-        form input[type="email"]:focus,
         form input[type="number"]:focus,
-        form input[type="date"]:focus,
         form select:focus {
             outline: none;
-            border-color: var(--color-accent);
-            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
         }
 
         form button[type="submit"] {
-            background-color: var(--color-accent);
+            background-color: var(--color-primary);
             color: white;
             border: none;
             padding: 12px 25px;
-            border-radius: 8px;
+            border-radius: 5px;
             cursor: pointer;
-            font-size: 1.1em;
+            font-size: 1.05em;
+            font-weight: bold;
             transition: background-color 0.3s ease, transform 0.2s ease;
-            grid-column: 1 / -1;
             margin-top: 15px;
-            justify-self: end;
             width: fit-content;
+            justify-self: end; /* Alinea el botón a la derecha dentro de su celda */
+            grid-column: span 2; /* Para que el botón de submit ocupe 2 columnas si es un grid */
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
 
         form button[type="submit"]:hover {
-            background-color: #1976D2;
-            transform: translateY(-2px);
+            background-color: var(--color-secondary); /* Azul más oscuro al pasar el ratón */
+            transform: translateY(-1px);
+        }
+        
+        /* Botón de eliminar (específico, para diferenciar) */
+        #formEliminar button[type="submit"] {
+            background-color: var(--color-danger); /* Rojo específico para eliminar */
+        }
+        #formEliminar button[type="submit"]:hover {
+            background-color: #C0392B; /* Rojo más oscuro para eliminar */
         }
 
         /* Estilos para la tabla */
@@ -195,30 +232,30 @@
             background-color: var(--color-card-background);
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
 
         table th,
         table td {
-            padding: 12px 15px;
+            padding: 12px 18px;
             text-align: left;
-            border-bottom: 1px solid var(--color-border);
+            border-bottom: 1px solid var(--color-border-light);
+            font-size: 0.95em;
         }
 
         table th {
             background-color: var(--color-secondary);
-            color: var(--color-text);
+            color: var(--color-text-light);
             font-weight: bold;
             text-transform: uppercase;
-            font-size: 0.9em;
         }
 
         table tbody tr:nth-child(even) {
-            background-color: #F8F9FA;
+            background-color: #FAFCFE; /* Color muy sutil para filas pares */
         }
 
         table tbody tr:hover {
-            background-color: #E3F2FD;
+            background-color: #E8F5FF; /* Azul muy claro al pasar el ratón */
         }
         
         /* **NUEVOS ESTILOS PARA LA SECCIÓN DE FILTRO** */
@@ -283,26 +320,47 @@
         /* Responsive adjustments */
         @media (max-width: 768px) {
             .container {
-                width: 95%;
-                margin: 20px auto;
+                width: 98%;
+                margin: 15px auto;
+                min-height: unset;
             }
-
             header h1 {
-                font-size: 1.8em;
+                font-size: 2em;
             }
-
+            #main-view-container {
+                padding: 15px;
+            }
+            .tab-buttons {
+                flex-direction: column; /* Apilar pestañas en móvil */
+                align-items: stretch; /* Estirar al ancho completo */
+                margin-bottom: 15px;
+            }
             .tab-button {
-                font-size: 1em;
-                padding: 12px 15px;
+                margin-left: 0;
+                margin-bottom: 8px; /* Espacio entre botones apilados */
+                border-bottom: none; /* Eliminar el borde inferior para apilado */
+                border-radius: 5px; /* Bordes para botones apilados */
+                text-align: center;
+                background-color: var(--color-background-light); /* Fondo para botones apilados */
+                color: var(--color-text-dark); /* Color de texto para botones apilados */
+                font-weight: normal;
             }
-
+            .tab-button.active {
+                background-color: var(--color-primary); /* Activo con el color primario */
+                color: white;
+                border: none;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            }
             form {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr; /* Una columna en móvil */
             }
-
-            form button[type="submit"], .main-action-button {
+            form button[type="submit"] {
                 width: 100%;
                 justify-self: stretch;
+                grid-column: span 1; /* Ocupa 1 columna en móvil */
+            }
+            .main-action-button {
+                width: 100%;
             }
             /* Ajustes para la sección de filtro en móvil */
             .filter-section {
@@ -319,17 +377,86 @@
 </head>
 <body>
     <div class="container">
+        <!-- HEADER GENERAL PARA TODA LA APP -->
         <header>
-            <h1>Gestión de Residuos</h1>
+            <h1>Gestión de Residuos <br> (Proyecto Jesús)</h1>
         </header>
 
-        <button class="main-action-button" onclick="showListView()">📊 Ver Listado de Residuos</button>
+        <!-- CONTENEDOR PRINCIPAL DEL LAYOUT DE CONTENIDO Y TABS -->
+        <div id="main-view-container">
+            <!-- Botón para alternar a la vista de listado (arriba del contenido principal) -->
+            <button class="main-action-button" onclick="showListView()">📊 Ver Listado de Residuos</button>
 
-        <div id="management-view" class="active-view">
-            <div class="tab-buttons">
-                <button class="tab-button active" onclick="showFormSection('agregar')">➕ Agregar Residuo</button>
-                <button class="tab-button" onclick="showFormSection('actualizar')">📝 Actualizar Residuo</button>
-                <button class="tab-button" onclick="showFormSection('eliminar')">❌ Eliminar Residuo</button>
+            <!-- VISTA DE GESTIÓN (FORMULARIOS) -->
+            <div id="management-view" class="active-view">
+                <!-- Pestañas de Agregar/Actualizar/Eliminar (alineadas a la derecha) -->
+                <div class="tab-buttons">
+                    <button class="tab-button active" onclick="showFormSection('agregar')">➕ Agregar Residuo</button>
+                    <button class="tab-button" onclick="showFormSection('actualizar')">📝 Actualizar Residuo</button>
+                    <button class="tab-button" onclick="showFormSection('eliminar')">❌ Eliminar Residuo</button>
+                </div>
+
+                <!-- SECCIÓN AGREGAR RESIDUO -->
+                <div id="seccion-agregar" class="tab-content active">
+                    <h2>Agregar Nuevo Residuo</h2>
+                    <form id="formAgregar">
+                        <label for="tipoAgregar">Tipo de Residuo:</label>
+                        <input type="text" id="tipoAgregar" name="tipo" placeholder="Ej: Cartón" required />
+
+                        <label for="cantidadAgregar">Cantidad:</label>
+                        <input type="number" id="cantidadAgregar" name="cantidad" placeholder="Ej: 5" required />
+                        
+                        <label for="estatusAgregar">Estatus:</label>
+                        <input type="text" id="estatusAgregar" name="estatus" placeholder="Ej: Procesado, Pendiente" required />
+                        
+                        <label for="puntoRecoleccionAgregar">Punto de Recolección:</label>
+                        <input type="text" id="puntoRecoleccionAgregar" name="punto_recoleccion" placeholder="Ej: Salón A, Cafetería" required />
+                        
+                        <label for="situacionAgregar">Situación:</label>
+                        <input type="text" id="situacionAgregar" name="situacion" placeholder="Ej: Inorgánico, Orgánico" required />
+                        
+                        <button type="submit">Guardar Residuo</button>
+                    </form>
+                </div>
+
+                <!-- SECCIÓN ACTUALIZAR RESIDUO -->
+                <div id="seccion-actualizar" class="tab-content">
+                    <h2>Actualizar Datos de Residuo</h2>
+                    <form id="formActualizar">
+                        <p style="grid-column: 1 / -1; margin-bottom: 10px; font-size: 0.95em; color: var(--color-text-dark);">Introduce el <strong>ID del Residuo</strong> para actualizar (obtenlo del listado):</p>
+                        <label for="idActualizar">ID del Residuo:</label>
+                        <input type="text" id="idActualizar" name="id_residuo" placeholder="ID del Residuo a actualizar" required />
+                        
+                        <p style="grid-column: 1 / -1; margin-top: 20px; margin-bottom: 10px; font-size: 0.95em; color: var(--color-text-dark);">Introduce los nuevos valores para los campos que deseas actualizar (deja en blanco los que no):</p>
+                        <label for="tipoActualizar">Nuevo Tipo:</label>
+                        <input type="text" id="tipoActualizar" name="tipo" placeholder="Nuevo Tipo" />
+                        
+                        <label for="cantidadActualizar">Nueva Cantidad:</label>
+                        <input type="number" id="cantidadActualizar" name="cantidad" placeholder="Nueva Cantidad" />
+                        
+                        <label for="estatusActualizar">Nuevo Estatus:</label>
+                        <input type="text" id="estatusActualizar" name="estatus" placeholder="Nuevo Estatus" />
+                        
+                        <label for="puntoRecoleccionActualizar">Nuevo Punto de Recolección:</label>
+                        <input type="text" id="puntoRecoleccionActualizar" name="punto_recoleccion" placeholder="Nuevo Punto de Recolección" />
+                        
+                        <label for="situacionActualizar">Nueva Situación:</label>
+                        <input type="text" id="situacionActualizar" name="situacion" placeholder="Nueva Situación" />
+                        
+                        <button type="submit">Actualizar Residuo</button>
+                    </form>
+                </div>
+
+                <!-- SECCIÓN ELIMINAR RESIDUO -->
+                <div id="seccion-eliminar" class="tab-content">
+                    <h2>Eliminar Residuo</h2>
+                    <form id="formEliminar">
+                        <p style="grid-column: 1 / -1; margin-bottom: 10px; font-size: 0.95em; color: var(--color-text-dark);">Introduce el <strong>ID del Residuo</strong> a eliminar (obtenlo del listado):</p>
+                        <label for="idEliminar">ID del Residuo:</label>
+                        <input type="text" id="idEliminar" name="id_residuo" placeholder="ID del Residuo a eliminar" required />
+                        <button type="submit">Eliminar Residuo</button>
+                    </form>
+                </div>
             </div>
 
             <div id="seccion-agregar" class="tab-content active">
@@ -395,8 +522,9 @@
                 </thead>
                 <tbody>
                     </tbody>
-            </table>
-            <button class="main-action-button" onclick="showManagementView()">⬅️ Volver a Gestión</button>
+                </table>
+                <button class="main-action-button" onclick="showManagementView()">⬅️ Volver a Gestión</button>
+            </div>
         </div>
     </div>
 
@@ -404,10 +532,10 @@
         // Función para cambiar entre las secciones de formularios (pestañas internas)
         function showFormSection(id) {
             document.querySelectorAll('#management-view .tab-content').forEach(sec => sec.classList.remove('active'));
-            document.querySelectorAll('#management-view .tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-buttons .tab-button').forEach(btn => btn.classList.remove('active')); // Seleccionar todos los botones de la barra de pestañas
 
             document.getElementById(`seccion-${id}`).classList.add('active');
-            document.querySelector(`#management-view .tab-button[onclick="showFormSection('${id}')"]`).classList.add('active');
+            document.querySelector(`.tab-buttons .tab-button[onclick="showFormSection('${id}')"]`).classList.add('active'); // Activar el botón correspondiente
         }
 
         // Función para mostrar la vista de Gestión de Residuos (formularios)
@@ -467,15 +595,13 @@
 
                 residuos.forEach(residuo => {
                     const fila = document.createElement('tr');
-                    // Mostrar todos los campos del residuo, incluyendo el _id
                     fila.innerHTML = `
                         <td>${residuo._id || 'N/A'}</td>
                         <td>${residuo.tipo || 'N/A'}</td>
-                        <td>${residuo.situacion || 'N/A'}</td>
-                        <td>${residuo.unidad_medida || 'N/A'}</td>
                         <td>${residuo.cantidad !== undefined && residuo.cantidad !== null ? residuo.cantidad : 'N/A'}</td>
-                        <td>${residuo.ubicacion || 'N/A'}</td>
-                        <td>${residuo.fecha_registro ? new Date(residuo.fecha_registro).toLocaleDateString() : 'N/A'}</td>
+                        <td>${residuo.estatus || 'N/A'}</td>
+                        <td>${residuo.punto_recoleccion || 'N/A'}</td>
+                        <td>${residuo.situacion || 'N/A'}</td>
                     `;
                     tbody.appendChild(fila);
                 });
@@ -492,11 +618,10 @@
             e.preventDefault();
             const datos = {
                 tipo: document.getElementById('tipoAgregar').value,
-                situacion: document.getElementById('situacionAgregar').value,
-                unidad_medida: document.getElementById('unidadMedidaAgregar').value,
                 cantidad: document.getElementById('cantidadAgregar').value ? parseInt(document.getElementById('cantidadAgregar').value) : undefined,
-                ubicacion: document.getElementById('ubicacionAgregar').value,
-                fecha_registro: document.getElementById('fechaRegistroAgregar').value ? new Date(document.getElementById('fechaRegistroAgregar').value) : undefined
+                estatus: document.getElementById('estatusAgregar').value,
+                punto_recoleccion: document.getElementById('puntoRecoleccionAgregar').value,
+                situacion: document.getElementById('situacionAgregar').value
             };
 
             try {
@@ -526,16 +651,14 @@
             e.preventDefault();
             const id_residuo = document.getElementById('idActualizar').value;
 
-            const datosAActualizar = { // Construir un objeto con solo los campos no vacíos
+            const datosAActualizar = {
                 tipo: document.getElementById('tipoActualizar').value || undefined,
-                situacion: document.getElementById('situacionActualizar').value || undefined,
-                unidad_medida: document.getElementById('unidadMedidaActualizar').value || undefined,
                 cantidad: document.getElementById('cantidadActualizar').value ? parseInt(document.getElementById('cantidadActualizar').value) : undefined,
-                ubicacion: document.getElementById('ubicacionActualizar').value || undefined,
-                fecha_registro: document.getElementById('fechaRegistroActualizar').value ? new Date(document.getElementById('fechaRegistroActualizar').value) : undefined
+                estatus: document.getElementById('estatusActualizar').value || undefined,
+                punto_recoleccion: document.getElementById('puntoRecoleccionActualizar').value || undefined,
+                situacion: document.getElementById('situacionActualizar').value || undefined
             };
             
-            // Eliminar propiedades que son 'undefined' o cadenas vacías
             Object.keys(datosAActualizar).forEach(key => {
                 if (datosAActualizar[key] === undefined || datosAActualizar[key] === '') {
                     delete datosAActualizar[key];
