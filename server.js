@@ -13,8 +13,6 @@ const uri = process.env.MONGODB_URI; // La URI de la base de datos se obtiene de
 // Verificar si la URI está definida
 if (!uri) {
     console.error('Error: La variable de entorno MONGODB_URI no está definida. Asegúrate de tener un archivo .env con MONGODB_URI.');
-    console.error('Para conectar a tu Atlas, el .env debería contener:');
-    console.error('MONGODB_URI="mongodb+srv://Jesus:Jesus@paec.guaxwsi.mongodb.net/JESUS?retryWrites=true&w=majority&appName=PAEC"'); // Ejemplo específico para Jesús
     process.exit(1); // Salir si la URI no está definida
 }
 
@@ -62,15 +60,16 @@ app.get('/api/residuos', async (req, res) => {
         }
         const residuosCollection = db.collection(COLLECTION_NAME);
 
-        let query = {}; // Objeto de consulta vacío por defecto
+        let query = {}; // Objeto de consulta vacío por defecto (para obtener todos)
 
         // Si se proporciona un parámetro 'ubicacion' en la URL (ej. /api/residuos?ubicacion=Salon%20A)
         if (req.query.ubicacion) {
             // Se usa una expresión regular con 'i' para búsqueda insensible a mayúsculas/minúsculas
+            // Esto permite flexibilidad en la entrada del usuario (ej. "salon a" filtrará "Salón A")
             query.ubicacion = { $regex: new RegExp(req.query.ubicacion, 'i') };
         }
 
-        const residuos = await residuosCollection.find(query).toArray(); // Encuentra documentos basados en el query
+        const residuos = await residuosCollection.find(query).toArray(); // Aplica el filtro si existe
         res.json(residuos); // Enviar los datos como JSON
     } catch (err) {
         console.error('Error al obtener los residuos:', err);
@@ -81,18 +80,20 @@ app.get('/api/residuos', async (req, res) => {
 // 2. Dar de Alta un nuevo Residuo (POST /api/residuos)
 app.post('/api/residuos', async (req, res) => {
     // Los datos del nuevo residuo vienen en req.body (ya parseados por express.json())
-    // **ACTUALIZADO: Campos para el nuevo esquema de Residuo de Jesús**
     const nuevoResiduo = {
         tipo: req.body.tipo,
-        cantidad: req.body.cantidad !== undefined ? Number(req.body.cantidad) : undefined, // Convertir cantidad a número
-        estatus: req.body.estatus,
-        punto_recoleccion: req.body.punto_recoleccion,
-        situacion: req.body.situacion
+        situacion: req.body.situacion,
+        unidad_medida: req.body.unidad_medida,
+        // Convertir cantidad a número, manejar undefined
+        cantidad: req.body.cantidad !== undefined ? Number(req.body.cantidad) : undefined,
+        ubicacion: req.body.ubicacion,
+        // Convertir fecha_registro a Date object, manejar undefined
+        fecha_registro: req.body.fecha_registro ? new Date(req.body.fecha_registro) : new Date() // Usar fecha enviada o la actual
     };
 
-    // **ACTUALIZADO: Validación de campos requeridos para el nuevo esquema**
-    if (!nuevoResiduo.tipo || nuevoResiduo.cantidad === undefined || !nuevoResiduo.estatus || !nuevoResiduo.punto_recoleccion || !nuevoResiduo.situacion) {
-        return res.status(400).json({ message: 'Faltan campos requeridos para el nuevo residuo (tipo, cantidad, estatus, punto_recoleccion, situacion).' });
+    // Opcional: Validar que los campos requeridos no estén vacíos
+    if (!nuevoResiduo.tipo || !nuevoResiduo.situacion || !nuevoResiduo.unidad_medida || nuevoResiduo.cantidad === undefined || !nuevoResiduo.ubicacion) {
+        return res.status(400).json({ message: 'Faltan campos requeridos para el nuevo residuo.' });
     }
 
     try {
@@ -135,10 +136,10 @@ app.put('/api/residuos/:id', async (req, res) => {
             if (key === 'cantidad') {
                 updateDoc.$set[key] = Number(datosAActualizar[key]);
             }
-            // **REMOVIDO: No hay fecha_registro, unidad_medida, ubicacion en el nuevo esquema**
-            // else if (key === 'fecha_registro' || key === 'unidad_medida' || key === 'ubicacion') {
-            //     // Lógica para campos que ya no existen, no se incluye
-            // }
+            // Convertir 'fecha_registro' a objeto Date
+            else if (key === 'fecha_registro') {
+                updateDoc.$set[key] = new Date(datosAActualizar[key]);
+            }
             else {
                 updateDoc.$set[key] = datosAActualizar[key];
             }
