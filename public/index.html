@@ -14,6 +14,7 @@
             --color-background: #F0F2F5; /* Fondo claro general */
             --color-card-background: #FFFFFF; /* Fondo de tarjetas/secciones */
             --color-border: #BBDEFB; /* Borde claro azul */
+            --color-danger: #D32F2F; /* Rojo para eliminar, si no está definido */
         }
 
         body {
@@ -219,6 +220,65 @@
         table tbody tr:hover {
             background-color: #E3F2FD;
         }
+        
+        /* **NUEVOS ESTILOS PARA LA SECCIÓN DE FILTRO** */
+        .filter-section {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: center;
+            flex-wrap: wrap; /* Para que se adapte en pantallas pequeñas */
+            padding: 15px; /* Pequeño padding alrededor del filtro */
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            background-color: var(--color-card-background);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-top: 20px; /* Margen superior para separarlo del título */
+        }
+        .filter-section label {
+            font-weight: bold;
+            color: var(--color-primary);
+            white-space: nowrap; /* Evitar salto de línea */
+        }
+        .filter-section input[type="text"] {
+            flex-grow: 1; /* Ocupa el espacio disponible */
+            min-width: 180px; /* Ancho mínimo para el input */
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: 1px solid var(--color-border);
+            font-size: 0.95em;
+        }
+        .filter-section input[type="text"]:focus {
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
+        }
+        .filter-section button {
+            padding: 8px 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .filter-section .filter-button {
+            background-color: var(--color-primary);
+            color: white;
+        }
+        .filter-section .filter-button:hover {
+            background-color: var(--color-secondary);
+            transform: translateY(-1px);
+        }
+        .filter-section .clear-filter-button {
+            background-color: #9E9E9E; /* Gris para el botón de limpiar */
+            color: white;
+        }
+        .filter-section .clear-filter-button:hover {
+            background-color: #757575;
+            transform: translateY(-1px);
+        }
+
 
         /* Responsive adjustments */
         @media (max-width: 768px) {
@@ -243,6 +303,16 @@
             form button[type="submit"], .main-action-button {
                 width: 100%;
                 justify-self: stretch;
+            }
+            /* Ajustes para la sección de filtro en móvil */
+            .filter-section {
+                flex-direction: column; /* Apilar elementos de filtro en móvil */
+                align-items: stretch;
+            }
+            .filter-section input[type="text"],
+            .filter-section button {
+                width: 100%; /* Estirar botones e input en móvil */
+                box-sizing: border-box;
             }
         }
     </style>
@@ -304,6 +374,13 @@
 
         <div id="list-view">
             <h2>Lista de Residuos Registrados</h2>
+            <!-- **NUEVO: Sección de filtro por Ubicación** -->
+            <div class="filter-section">
+                <label for="filtroUbicacion">Filtrar por Ubicación:</label>
+                <input type="text" id="filtroUbicacion" placeholder="Ej: Salones, Cafetería" />
+                <button class="filter-button" onclick="aplicarFiltroPAEC()">🔍 Filtrar</button>
+                <button class="clear-filter-button" onclick="limpiarFiltroPAEC()">✖️ Limpiar Filtro</button>
+            </div>
             <table id="tablaResiduos">
                 <thead>
                     <tr>
@@ -345,24 +422,45 @@
         async function showListView() {
             document.getElementById('management-view').classList.remove('active-view');
             document.getElementById('list-view').classList.add('active-view');
-            await cargarResiduos(); // Cargar los residuos cuando se activa la vista de lista
+            // Limpia el input de filtro al entrar a la vista de lista
+            document.getElementById('filtroUbicacion').value = ''; 
+            await cargarResiduosPAEC(); // Cargar los residuos sin filtro inicial
         }
 
-        // Función para cargar los datos de los residuos en la tabla
-        async function cargarResiduos() {
+        // **NUEVO: Funciones para aplicar y limpiar el filtro en tu proyecto PAEC**
+        async function aplicarFiltroPAEC() {
+            await cargarResiduosPAEC(); // Vuelve a cargar los residuos con el filtro aplicado
+        }
+
+        async function limpiarFiltroPAEC() {
+            document.getElementById('filtroUbicacion').value = ''; // Limpia el input
+            await cargarResiduosPAEC(); // Vuelve a cargar todos los residuos
+        }
+
+        // Función para cargar los datos de los residuos en la tabla (ACTUALIZADA PARA FILTRO)
+        async function cargarResiduosPAEC() {
             try {
-                // La API ahora será /api/residuos
-                const res = await fetch('/api/residuos');
+                // Obtener el valor del filtro de ubicación
+                const filtro = document.getElementById('filtroUbicacion').value.trim();
+                let url = '/api/residuos';
+
+                // Si hay un filtro, añadirlo como query parameter
+                if (filtro) {
+                    url += `?ubicacion=${encodeURIComponent(filtro)}`;
+                }
+
+                const res = await fetch(url);
                 if (!res.ok) {
                     throw new Error(`Error HTTP: ${res.status}`);
                 }
                 const residuos = await res.json();
-                const tbody = document.querySelector('#tablaResiduos tbody'); // ID de la tabla actualizado
+                const tbody = document.querySelector('#tablaResiduos tbody');
                 tbody.innerHTML = ''; // Limpiar la tabla antes de cargar nuevos datos
 
                 if (residuos.length === 0) {
                     const filaVacia = document.createElement('tr');
-                    filaVacia.innerHTML = `<td colspan="7" style="text-align: center; padding: 20px; color: #666;">No hay residuos registrados aún.</td>`;
+                    // Mensaje actualizado si no hay residuos o no hay para el filtro
+                    filaVacia.innerHTML = `<td colspan="7" style="text-align: center; padding: 20px; color: #666;">No hay residuos registrados aún${filtro ? ` para "${filtro}"` : ''}.</td>`;
                     tbody.appendChild(filaVacia);
                     return;
                 }
@@ -402,7 +500,7 @@
             };
 
             try {
-                const res = await fetch('/api/residuos', { // Ruta actualizada
+                const res = await fetch('/api/residuos', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(datos)
@@ -412,7 +510,7 @@
                     alert(result.message || "Residuo agregado con éxito.");
                     document.getElementById('formAgregar').reset();
                     if (document.getElementById('list-view').classList.contains('active-view')) {
-                        cargarResiduos();
+                        cargarResiduosPAEC(); // Llama a la versión PAEC
                     }
                 } else {
                     alert(`Error al agregar residuo: ${result.message || 'Error desconocido'}`);
@@ -426,7 +524,7 @@
         // Actualizar residuo
         document.getElementById('formActualizar').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const id_residuo = document.getElementById('idActualizar').value; // Obtener el ID del residuo
+            const id_residuo = document.getElementById('idActualizar').value;
 
             const datosAActualizar = { // Construir un objeto con solo los campos no vacíos
                 tipo: document.getElementById('tipoActualizar').value || undefined,
@@ -455,7 +553,7 @@
             }
 
             try {
-                const res = await fetch(`/api/residuos/${encodeURIComponent(id_residuo)}`, { // Ruta actualizada con ID
+                const res = await fetch(`/api/residuos/${encodeURIComponent(id_residuo)}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(datosAActualizar)
@@ -465,7 +563,7 @@
                     alert(result.message || "Residuo actualizado con éxito.");
                     document.getElementById('formActualizar').reset();
                     if (document.getElementById('list-view').classList.contains('active-view')) {
-                        cargarResiduos();
+                        cargarResiduosPAEC(); // Llama a la versión PAEC
                     }
                 } else {
                     alert(`Error al actualizar residuo: ${result.message || 'Error desconocido'}`);
@@ -479,7 +577,7 @@
         // Eliminar residuo
         document.getElementById('formEliminar').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const id_residuo = document.getElementById('idEliminar').value; // Obtener el ID del residuo
+            const id_residuo = document.getElementById('idEliminar').value;
 
             if (!id_residuo) {
                 alert("Por favor, introduce el ID del residuo a eliminar.");
@@ -491,7 +589,7 @@
             }
 
             try {
-                const res = await fetch(`/api/residuos/${encodeURIComponent(id_residuo)}`, { // Ruta actualizada con ID
+                const res = await fetch(`/api/residuos/${encodeURIComponent(id_residuo)}`, {
                     method: 'DELETE'
                 });
                 const result = await res.json();
@@ -499,7 +597,7 @@
                     alert(result.message || "Residuo eliminado con éxito.");
                     document.getElementById('formEliminar').reset();
                     if (document.getElementById('list-view').classList.contains('active-view')) {
-                        cargarResiduos();
+                        cargarResiduosPAEC(); // Llama a la versión PAEC
                     }
                 } else {
                     alert(`Error al eliminar residuo: ${result.message || 'Error desconocido'}`);

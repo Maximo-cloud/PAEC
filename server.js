@@ -5,11 +5,9 @@ const express = require('express');
 const { MongoClient, ObjectId } = require('mongodb'); // Importamos ObjectId
 const path = require('path');
 const app = express();
-// const PORT = 3000; // Lo eliminamos para usar la variable de entorno
 const PORT = process.env.PORT || 3000; // Usar el puerto de las variables de entorno o 3000 por defecto
 
 
-// const uri = 'mongodb+srv://Maximo:12322123@paec.lwkdwah.mongodb.net/?retryWrites=true&w=majority&appName=PAEC'; // Eliminamos esta línea
 const uri = process.env.MONGODB_URI; // La URI de la base de datos se obtiene de las variables de entorno
 
 // Verificar si la URI está definida
@@ -20,8 +18,8 @@ if (!uri) {
 
 const client = new MongoClient(uri);
 
-const DB_NAME = 'PAEC';
-const COLLECTION_NAME = 'RESIDUOS';
+const DB_NAME = 'PAEC'; // Tu base de datos original
+const COLLECTION_NAME = 'RESIDUOS'; // Tu colección original
 
 let db;
 
@@ -54,13 +52,23 @@ app.get('/', (req, res) => {
 // API ENDPOINTS PARA RESIDUOS
 
 // 1. Obtener todos los residuos (GET /api/residuos)
+// ACTUALIZADO: Ahora acepta un parámetro de consulta para filtrar por 'ubicacion'
 app.get('/api/residuos', async (req, res) => {
     try {
         if (!db) {
             return res.status(500).json({ message: 'Error: La base de datos no está conectada.' });
         }
         const residuosCollection = db.collection(COLLECTION_NAME);
-        const residuos = await residuosCollection.find({}).toArray();
+
+        let query = {}; // Objeto de consulta vacío por defecto
+
+        // Si se proporciona un parámetro 'ubicacion' en la URL (ej. /api/residuos?ubicacion=Salon%20A)
+        if (req.query.ubicacion) {
+            // Se usa una expresión regular con 'i' para búsqueda insensible a mayúsculas/minúsculas
+            query.ubicacion = { $regex: new RegExp(req.query.ubicacion, 'i') };
+        }
+
+        const residuos = await residuosCollection.find(query).toArray(); // Encuentra documentos basados en el query
         res.json(residuos); // Enviar los datos como JSON
     } catch (err) {
         console.error('Error al obtener los residuos:', err);
