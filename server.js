@@ -5,22 +5,24 @@ const express = require('express');
 const { MongoClient, ObjectId } = require('mongodb'); // Importamos ObjectId
 const path = require('path');
 const app = express();
-// const PORT = 3000; // Lo eliminamos para usar la variable de entorno
 const PORT = process.env.PORT || 3000; // Usar el puerto de las variables de entorno o 3000 por defecto
 
 
-// const uri = 'mongodb+srv://Maximo:12322123@paec.lwkdwah.mongodb.net/?retryWrites=true&w=majority&appName=PAEC'; // Eliminamos esta línea
 const uri = process.env.MONGODB_URI; // La URI de la base de datos se obtiene de las variables de entorno
 
 // Verificar si la URI está definida
 if (!uri) {
     console.error('Error: La variable de entorno MONGODB_URI no está definida. Asegúrate de tener un archivo .env con MONGODB_URI.');
+    console.error('Para conectar a tu Atlas, el .env debería contener:');
+    console.error('MONGODB_URI="mongodb+srv://Jesus:Jesus@paec.guaxwsi.mongodb.net/JESUS?retryWrites=true&w=majority&appName=PAEC"'); // Ejemplo específico para Jesús
     process.exit(1); // Salir si la URI no está definida
 }
 
 const client = new MongoClient(uri);
 
-const DB_NAME = 'PAEC';
+// **ACTUALIZADO: Nombre de la base de datos para el proyecto de Jesús**
+const DB_NAME = 'JESUS';
+// **ACTUALIZADO: Nombre de la colección (se mantiene RESIDUOS como en tu captura de Compass para la DB JESUS)**
 const COLLECTION_NAME = 'RESIDUOS';
 
 let db;
@@ -71,20 +73,18 @@ app.get('/api/residuos', async (req, res) => {
 // 2. Dar de Alta un nuevo Residuo (POST /api/residuos)
 app.post('/api/residuos', async (req, res) => {
     // Los datos del nuevo residuo vienen en req.body (ya parseados por express.json())
+    // **ACTUALIZADO: Campos para el nuevo esquema de Residuo de Jesús**
     const nuevoResiduo = {
         tipo: req.body.tipo,
-        situacion: req.body.situacion,
-        unidad_medida: req.body.unidad_medida,
-        // Convertir cantidad a número, manejar undefined
-        cantidad: req.body.cantidad !== undefined ? Number(req.body.cantidad) : undefined,
-        ubicacion: req.body.ubicacion,
-        // Convertir fecha_registro a Date object, manejar undefined
-        fecha_registro: req.body.fecha_registro ? new Date(req.body.fecha_registro) : new Date() // Usar fecha enviada o la actual
+        cantidad: req.body.cantidad !== undefined ? Number(req.body.cantidad) : undefined, // Convertir cantidad a número
+        estatus: req.body.estatus,
+        punto_recoleccion: req.body.punto_recoleccion,
+        situacion: req.body.situacion
     };
 
-    // Opcional: Validar que los campos requeridos no estén vacíos
-    if (!nuevoResiduo.tipo || !nuevoResiduo.situacion || !nuevoResiduo.unidad_medida || nuevoResiduo.cantidad === undefined || !nuevoResiduo.ubicacion) {
-        return res.status(400).json({ message: 'Faltan campos requeridos para el nuevo residuo.' });
+    // **ACTUALIZADO: Validación de campos requeridos para el nuevo esquema**
+    if (!nuevoResiduo.tipo || nuevoResiduo.cantidad === undefined || !nuevoResiduo.estatus || !nuevoResiduo.punto_recoleccion || !nuevoResiduo.situacion) {
+        return res.status(400).json({ message: 'Faltan campos requeridos para el nuevo residuo (tipo, cantidad, estatus, punto_recoleccion, situacion).' });
     }
 
     try {
@@ -127,10 +127,10 @@ app.put('/api/residuos/:id', async (req, res) => {
             if (key === 'cantidad') {
                 updateDoc.$set[key] = Number(datosAActualizar[key]);
             }
-            // Convertir 'fecha_registro' a objeto Date
-            else if (key === 'fecha_registro') {
-                updateDoc.$set[key] = new Date(datosAActualizar[key]);
-            }
+            // **REMOVIDO: No hay fecha_registro, unidad_medida, ubicacion en el nuevo esquema**
+            // else if (key === 'fecha_registro' || key === 'unidad_medida' || key === 'ubicacion') {
+            //     // Lógica para campos que ya no existen, no se incluye
+            // }
             else {
                 updateDoc.$set[key] = datosAActualizar[key];
             }
